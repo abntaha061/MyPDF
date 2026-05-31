@@ -20,6 +20,8 @@ import com.example.data.PdfRepository
 import com.example.data.GeminiClient
 import com.example.data.DictionaryManager
 import com.example.data.DictionaryEntry
+import com.example.data.PageBookmark
+import com.example.data.ReadingHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -56,6 +58,8 @@ class PdfRendererViewModel(application: Application) : AndroidViewModel(applicat
     val recentFiles: StateFlow<List<PdfFile>>
     val bookmarkedFiles: StateFlow<List<PdfFile>>
     val allFolders: StateFlow<List<String>>
+    val allPageBookmarks: StateFlow<List<PageBookmark>>
+    val allReadingHistory: StateFlow<List<ReadingHistory>>
 
     // UI Configuration & Display States
     var appTheme by mutableStateOf(prefs.getString("app_theme", "dark") ?: "dark")
@@ -144,6 +148,12 @@ class PdfRendererViewModel(application: Application) : AndroidViewModel(applicat
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         allFolders = repository.allFolders
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        allPageBookmarks = repository.allPageBookmarks
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        allReadingHistory = repository.allReadingHistory
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
         searchResults = listSearchQuery
@@ -282,6 +292,7 @@ class PdfRendererViewModel(application: Application) : AndroidViewModel(applicat
 
         viewModelScope.launch {
             repository.updateReadingProgress(pdfFile.id, pdfFile.currentPage)
+            repository.insertHistoryEntry(pdfFile.id, pdfFile.title, pdfFile.currentPage)
         }
     }
 
@@ -291,7 +302,36 @@ class PdfRendererViewModel(application: Application) : AndroidViewModel(applicat
         currentPdfFile?.let { openFile ->
             viewModelScope.launch {
                 repository.updateReadingProgress(openFile.id, index)
+                repository.insertHistoryEntry(openFile.id, openFile.title, index)
             }
+        }
+    }
+
+    // --- Page Bookmarks ---
+    fun addPageBookmark(pageIndex: Int, label: String) {
+        val file = currentPdfFile ?: return
+        viewModelScope.launch {
+            repository.insertPageBookmark(
+                PageBookmark(
+                    pdfFileId = file.id,
+                    pdfTitle = file.title,
+                    pageIndex = pageIndex,
+                    label = label
+                )
+            )
+        }
+    }
+
+    fun deletePageBookmark(id: Int) {
+        viewModelScope.launch {
+            repository.deletePageBookmark(id)
+        }
+    }
+
+    // --- Reading History Controls ---
+    fun clearAllReadingHistory() {
+        viewModelScope.launch {
+            repository.clearHistory()
         }
     }
 

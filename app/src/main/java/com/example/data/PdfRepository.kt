@@ -22,6 +22,31 @@ class PdfRepository(private val context: Context, private val pdfDao: PdfDao) {
     val bookmarkedFiles: Flow<List<PdfFile>> = pdfDao.getBookmarkedFiles()
     val allFolders: Flow<List<String>> = pdfDao.getAllFolders()
 
+    // --- NEW: Bookmarks and Reading History Flows & Helpers ---
+    val allPageBookmarks: Flow<List<PageBookmark>> = pdfDao.getAllPageBookmarks()
+    val allReadingHistory: Flow<List<ReadingHistory>> = pdfDao.getAllReadingHistory()
+
+    fun getPageBookmarksForFile(pdfFileId: Int): Flow<List<PageBookmark>> = pdfDao.getPageBookmarksForFile(pdfFileId)
+    
+    suspend fun insertPageBookmark(bookmark: PageBookmark): Long = withContext(Dispatchers.IO) {
+        pdfDao.insertPageBookmark(bookmark)
+    }
+
+    suspend fun deletePageBookmark(id: Int) = withContext(Dispatchers.IO) {
+        pdfDao.deletePageBookmark(id)
+    }
+
+    fun getReadingHistorySince(sinceTimestamp: Long): Flow<List<ReadingHistory>> = pdfDao.getReadingHistorySince(sinceTimestamp)
+
+    suspend fun insertHistoryEntry(pdfFileId: Int, pdfTitle: String, pageIndex: Int) = withContext(Dispatchers.IO) {
+        val entry = ReadingHistory(pdfFileId = pdfFileId, pdfTitle = pdfTitle, pageIndex = pageIndex)
+        pdfDao.insertHistoryEntry(entry)
+    }
+
+    suspend fun clearHistory() = withContext(Dispatchers.IO) {
+        pdfDao.clearAllHistory()
+    }
+
     fun getFilesByFolder(folder: String): Flow<List<PdfFile>> = pdfDao.getFilesByFolder(folder)
     fun searchFiles(query: String): Flow<List<PdfFile>> = pdfDao.searchFiles(query)
 

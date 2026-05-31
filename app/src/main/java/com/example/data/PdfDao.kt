@@ -37,4 +37,30 @@ interface PdfDao {
 
     @Delete
     suspend fun deleteFile(pdfFile: PdfFile)
+
+    // --- PageBookmark Queries ---
+    @Query("SELECT * FROM page_bookmarks ORDER BY addedDate DESC")
+    fun getAllPageBookmarks(): Flow<List<PageBookmark>>
+
+    @Query("SELECT * FROM page_bookmarks WHERE pdfFileId = :pdfFileId ORDER BY pageIndex ASC")
+    fun getPageBookmarksForFile(pdfFileId: Int): Flow<List<PageBookmark>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPageBookmark(pageBookmark: PageBookmark): Long
+
+    @Query("DELETE FROM page_bookmarks WHERE id = :id")
+    suspend fun deletePageBookmark(id: Int)
+
+    // --- ReadingHistory Queries ---
+    @Query("SELECT * FROM reading_history ORDER BY timestamp DESC")
+    fun getAllReadingHistory(): Flow<List<ReadingHistory>>
+
+    @Query("SELECT * FROM reading_history WHERE timestamp >= :sinceTimestamp ORDER BY timestamp DESC")
+    fun getReadingHistorySince(sinceTimestamp: Long): Flow<List<ReadingHistory>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHistoryEntry(readingHistory: ReadingHistory): Long
+
+    @Query("DELETE FROM reading_history")
+    suspend fun clearAllHistory()
 }

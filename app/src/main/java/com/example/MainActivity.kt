@@ -2,7 +2,10 @@ package com.example
 
 import android.net.Uri
 import android.os.Bundle
+import android.content.Intent
 import android.widget.Toast
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -371,12 +374,26 @@ fun BookmarksTabScreen(
     onOpenFile: (PdfFile) -> Unit,
     onMenuClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val bookmarkedFiles by viewModel.bookmarkedFiles.collectAsState()
+    val allPageBookmarks by viewModel.allPageBookmarks.collectAsState()
+    val allFiles by viewModel.allFiles.collectAsState()
+
+    var selectedTab by remember { mutableStateOf(0) } // 0 = Pages Bookmarks, 1 = Starred Files
+    var sortByDate by remember { mutableStateOf(true) } // true = Date, false = Page Index
+
+    val sortedPageBookmarks = remember(allPageBookmarks, sortByDate) {
+        if (sortByDate) {
+            allPageBookmarks.sortedByDescending { it.addedDate }
+        } else {
+            allPageBookmarks.sortedWith(compareBy({ it.pdfTitle }, { it.pageIndex }))
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.tab_bookmarks), fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = { Text(text = "الإشارات المرجعية والملفات", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onMenuClick) {
                         Icon(imageVector = Icons.Default.Menu, contentDescription = "Drawer icon")
@@ -396,39 +413,224 @@ fun BookmarksTabScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            if (bookmarkedFiles.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+            // Segmented Tab Selector
+            TabRow(selectedTabIndex = selectedTab) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = { Text("إشارات الصفحات المخصصة", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                    icon = { Icon(Icons.Default.BookmarkBorder, null) }
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = { Text("الملفات المفضلة", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                    icon = { Icon(Icons.Default.StarBorder, null) }
+                )
+            }
+
+            if (selectedTab == 0) {
+                // Pages Bookmarks Segment
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.BookmarkBorder,
-                            contentDescription = "No bookmarks",
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                            modifier = Modifier.size(80.dp)
+                    // Sorting controls using FilterChip
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FilterChip(
+                            selected = sortByDate,
+                            onClick = { sortByDate = true },
+                            label = { Text("تاريخ الإضافة", fontSize = 11.sp) }
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = stringResource(R.string.no_bookmarks),
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                            fontWeight = FontWeight.Medium
+                        FilterChip(
+                            selected = !sortByDate,
+                            onClick = { sortByDate = false },
+                            label = { Text("رقم الصفحة", fontSize = 11.sp) }
                         )
+                    }
+
+                    // Export central JSON Button
+                    if (sortedPageBookmarks.isNotEmpty()) {
+                        IconButton(onClick = {
+                            try {
+                                val array = org.json.JSONArray()
+                                sortedPageBookmarks.forEach { bm ->
+                                    val obj = org.json.JSONObject().apply {
+                                        put("id", bm.id)
+                                        put("fileId", bm.pdfFileId)
+                                        put("pdfTitle", bm.pdfTitle)
+                                        put("pageIndex", bm.pageIndex)
+                                        put("label", bm.label)
+                                        put("addedDate", bm.addedDate)
+                                    }
+                                    array.put(obj)
+                                }
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "تصدير الإشارات المرجعية المركزية لقارئ PDF")
+                                    putExtra(Intent.EXTRA_TEXT, array.toString(2))
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "تصدير / مشاركة الإشارات كـ JSON:"))
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "فشل تصدير الإشارات المرجعية", Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Icon(Icons.Default.Share, "تصدير الإشارات", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+
+                if (sortedPageBookmarks.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.BookmarkAdd,
+                                contentDescription = "No bookmarks",
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                modifier = Modifier.size(72.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "لا توجد علامات مرجعية للصفحات مضافة حالياً.",
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "يمكنك إضافة علامات مخصصة مباشرة أثناء قراءة أي ملف PDF بالضغط على زر الحفظ أعلى شريط القراءة.",
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                                fontSize = 11.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                    ) {
+                        items(sortedPageBookmarks) { bm ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            val coreFile = allFiles.find { it.id == bm.pdfFileId }
+                                            if (coreFile != null) {
+                                                val targetFile = coreFile.copy(currentPage = bm.pageIndex)
+                                                onOpenFile(targetFile)
+                                            } else {
+                                                Toast.makeText(context, "الملف غير متوفر حالياً.", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        onClick = { viewModel.deletePageBookmark(bm.id) },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(Icons.Default.DeleteForever, "حذف", tint = Color.Red.copy(alpha = 0.8f))
+                                    }
+
+                                    Column(
+                                        horizontalAlignment = Alignment.End,
+                                        modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                                    ) {
+                                        Text(
+                                            text = bm.label,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "الصفحة ${bm.pageIndex + 1}",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Text(
+                                                text = "•",
+                                                fontSize = 11.sp,
+                                                color = Color.Gray
+                                            )
+                                            Text(
+                                                text = bm.pdfTitle,
+                                                fontSize = 11.sp,
+                                                color = Color.Gray,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(bookmarkedFiles) { file ->
-                        com.example.ui.screens.PdfListItem(
-                            file = file,
-                            viewModel = viewModel,
-                            onClick = { onOpenFile(file) },
-                            onMenuClick = { viewModel.toggleBookmark(file) }
-                        )
+                // Starred Files Segment (Original files bookmark)
+                if (bookmarkedFiles.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.BookmarkBorder,
+                                contentDescription = "No bookmarked files",
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                modifier = Modifier.size(80.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "لا توجد ملفات تفضيل مميزة بنجمة.",
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                    ) {
+                        items(bookmarkedFiles) { file ->
+                            com.example.ui.screens.PdfListItem(
+                                file = file,
+                                viewModel = viewModel,
+                                onClick = { onOpenFile(file) },
+                                onMenuClick = { viewModel.toggleBookmark(file) }
+                            )
+                        }
                     }
                 }
             }

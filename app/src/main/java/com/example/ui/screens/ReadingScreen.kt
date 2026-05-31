@@ -69,6 +69,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import com.example.R
 import com.example.data.PdfFile
 import com.example.ui.PdfRendererViewModel
@@ -97,6 +100,12 @@ fun ReadingScreen(
     val totalPages = viewModel.totalPagesCount
 
     var isSearchActive by remember { mutableStateOf(false) }
+    var showPageBookmarkDialog by remember { mutableStateOf(false) }
+
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     // Keep screen awake config
     DisposableEffect(viewModel.keepScreenOn) {
@@ -239,6 +248,18 @@ fun ReadingScreen(
     val renderedPagesCount = (0 until totalPages).filterNot { viewModel.deletedPagesList.contains(it) }
 
     Scaffold(
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .focusable()
+            .onKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.F && keyEvent.isCtrlPressed) {
+                    isSearchActive = !isSearchActive
+                    if (!isSearchActive) {
+                        viewModel.clearPdfSearch()
+                    }
+                    true
+                } else false
+            },
         topBar = {
             Column {
                 AnimatedVisibility(
@@ -265,7 +286,8 @@ fun ReadingScreen(
                                 Toast.makeText(context, "مشاركة الملف الحالية...", Toast.LENGTH_SHORT).show()
                             }
                         },
-                        onSearchClick = { isSearchActive = !isSearchActive }
+                        onSearchClick = { isSearchActive = !isSearchActive },
+                        onPageBookmarkClick = { showPageBookmarkDialog = true }
                     )
                 }
 
@@ -975,6 +997,174 @@ fun ReadingScreen(
             }
         }
     }
+
+    if (showPageBookmarkDialog) {
+        var bookmarkLabel by remember { mutableStateOf("${pdfFile.title} - ص ${viewModel.currentPageIndex + 1}") }
+        val allPageBookmarks by viewModel.allPageBookmarks.collectAsState()
+        val fileBookmarks = remember(allPageBookmarks) {
+            allPageBookmarks.filter { it.pdfFileId == pdfFile.id }
+        }
+
+        AlertDialog(
+            onDismissRequest = { showPageBookmarkDialog = false },
+            title = {
+                Text(
+                    text = "إشارات مرجعية مخصصة للصفحات",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 4.dp),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        "إضافة إشارة مرجعية لصفحتك الحالية (السياقية) لتسهيل التنقل والوصول المركزي في أي وقت:",
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.Right,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    )
+
+                    OutlinedTextField(
+                        value = bookmarkLabel,
+                        onValueChange = { bookmarkLabel = it },
+                        label = { Text("تسمية الإشارة المرجعية") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Button(
+                        onClick = {
+                            if (bookmarkLabel.isNotBlank()) {
+                                viewModel.addPageBookmark(viewModel.currentPageIndex, bookmarkLabel.trim())
+                                Toast.makeText(context, "تم حفظ الإشارة المرجعية بنجاح!", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("إضافة إشارة مرجعية للصفحة ${viewModel.currentPageIndex + 1}")
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Gray.copy(alpha = 0.3f)))
+
+                    Text(
+                        "العلامات المحفوظة لهذا الملف (${fileBookmarks.size})",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        textAlign = TextAlign.Right
+                    )
+
+                    if (fileBookmarks.isEmpty()) {
+                        Text(
+                            "لا توجد إشارات مخصصة لهذا الملف حتى الآن.",
+                            fontSize = 11.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Right,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        fileBookmarks.forEach { bm ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (bm.pageIndex == viewModel.currentPageIndex)
+                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.updatePageProgress(bm.pageIndex)
+                                            showPageBookmarkDialog = false
+                                        }
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        onClick = { viewModel.deletePageBookmark(bm.id) },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(Icons.Default.Delete, "حذف", tint = Color.Red, modifier = Modifier.size(16.dp))
+                                    }
+
+                                    Column(
+                                        horizontalAlignment = Alignment.End,
+                                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = bm.label,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = "الصفحة ${bm.pageIndex + 1}",
+                                            fontSize = 10.sp,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (fileBookmarks.isNotEmpty()) {
+                        Button(
+                            onClick = {
+                                try {
+                                    val array = org.json.JSONArray()
+                                    fileBookmarks.forEach { bm ->
+                                        val obj = org.json.JSONObject().apply {
+                                            put("file", bm.pdfTitle)
+                                            put("page", bm.pageIndex)
+                                            put("label", bm.label)
+                                            put("date", bm.addedDate)
+                                        }
+                                        array.put(obj)
+                                    }
+                                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_SUBJECT, "إشارات مرجعية لملف: ${pdfFile.title}")
+                                        putExtra(Intent.EXTRA_TEXT, array.toString(2))
+                                    }
+                                    context.startActivity(Intent.createChooser(sendIntent, "تصدير / مشاركة الإشارات المرجعية:"))
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "فشل في تصدير الإشارات المرجعية", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Share, null)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("تصدير ومشاركة كـ JSON")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPageBookmarkDialog = false }) {
+                    Text("إغلاق")
+                }
+            }
+        )
+    }
 }
 
 // ---------------- VIEWS TAB ----------------
@@ -1111,8 +1301,11 @@ fun ViewNavTab(viewModel: PdfRendererViewModel) {
                     val chapters = remember(viewModel.currentPdfFile, viewModel.totalPagesCount) {
                         viewModel.getTableOfContents()
                     }
+                    val currentChapter = remember(viewModel.currentPageIndex, chapters) {
+                        chapters.lastOrNull { it.pageIndex <= viewModel.currentPageIndex } ?: chapters.firstOrNull()
+                    }
                     chapters.forEach { chapter ->
-                        val isCurrentChapter = chapter.pageIndex == viewModel.currentPageIndex
+                        val isCurrentChapter = (chapter == currentChapter)
                         val borderCol = if (isCurrentChapter) MaterialTheme.colorScheme.primary else Color.Transparent
                         val bgCol = if (isCurrentChapter) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent
 
@@ -2520,7 +2713,8 @@ fun WpsReaderTopBar(
     onBookmarkToggle: () -> Unit,
     onToolsClick: () -> Unit,
     onShareClick: () -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    onPageBookmarkClick: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -2547,6 +2741,13 @@ fun WpsReaderTopBar(
         actions = {
             IconButton(onClick = onSearchClick) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "البحث داخل الملف", tint = Color.White)
+            }
+            IconButton(onClick = onPageBookmarkClick) {
+                Icon(
+                    imageVector = Icons.Default.BookmarkAdd,
+                    contentDescription = "علامات مرجعية للصفحة الحالية",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
             }
             IconButton(onClick = onBookmarkToggle) {
                 Icon(

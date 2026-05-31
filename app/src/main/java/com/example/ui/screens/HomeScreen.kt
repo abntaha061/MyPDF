@@ -2,6 +2,11 @@ package com.example.ui.screens
 
 import android.net.Uri
 import android.widget.Toast
+import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
+import kotlin.math.roundToInt
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
@@ -139,85 +144,388 @@ fun HomeScreen(
                 filePicker.launch("application/pdf")
             })
 
-            Text(
-                text = stringResource(R.string.tab_recent),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-            )
+            var activeHomeTab by remember { mutableStateOf(0) } // 0 = Recent Files, 1 = Reading Statistics & Logs
 
-            if (recentFiles.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(24.dp)
+            TabRow(selectedTabIndex = activeHomeTab) {
+                Tab(
+                    selected = activeHomeTab == 0,
+                    onClick = { activeHomeTab = 0 },
+                    text = { Text("الملفات الأخيرة", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                    icon = { Icon(Icons.Default.RecentActors, null) }
+                )
+                Tab(
+                    selected = activeHomeTab == 1,
+                    onClick = { activeHomeTab = 1 },
+                    text = { Text("نشاط وإحصائيات القراءة", fontWeight = FontWeight.Bold, fontSize = 13.sp) },
+                    icon = { Icon(Icons.Default.Analytics, null) }
+                )
+            }
+
+            if (activeHomeTab == 0) {
+                Text(
+                    text = stringResource(R.string.tab_recent),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+
+                if (recentFiles.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.InsertDriveFile,
-                            contentDescription = "Empty PDFs",
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                            modifier = Modifier.size(72.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.no_recent_files),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            lineHeight = 20.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { filePicker.launch("application/pdf") },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(24.dp)
                         ) {
-                            Icon(imageVector = Icons.Default.PictureAsPdf, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = stringResource(R.string.btn_import_pdf))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.InsertDriveFile,
+                                contentDescription = "Empty PDFs",
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                modifier = Modifier.size(72.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(R.string.no_recent_files),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                lineHeight = 20.sp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = { filePicker.launch("application/pdf") },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Icon(imageVector = Icons.Default.PictureAsPdf, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = stringResource(R.string.btn_import_pdf))
+                            }
+                        }
+                    }
+                } else {
+                    if (isGridView) {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(recentFiles) { file ->
+                                PdfGridItem(
+                                    file = file,
+                                    viewModel = viewModel,
+                                    onClick = { onOpenFile(file) },
+                                    onMenuClick = { selectedFileForMenu = file }
+                                )
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(recentFiles) { file ->
+                                PdfListItem(
+                                    file = file,
+                                    viewModel = viewModel,
+                                    onClick = { onOpenFile(file) },
+                                    onMenuClick = { selectedFileForMenu = file }
+                                )
+                            }
                         }
                     }
                 }
             } else {
-                if (isGridView) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(recentFiles) { file ->
-                            PdfGridItem(
-                                file = file,
-                                viewModel = viewModel,
-                                onClick = { onOpenFile(file) },
-                                onMenuClick = { selectedFileForMenu = file }
-                            )
-                        }
-                    }
-                } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(recentFiles) { file ->
-                            PdfListItem(
-                                file = file,
-                                viewModel = viewModel,
-                                onClick = { onOpenFile(file) },
-                                onMenuClick = { selectedFileForMenu = file }
-                            )
-                        }
-                    }
+                // GORGEOUS ANALYTICS TAB CONTENT
+                val allHistory by viewModel.allReadingHistory.collectAsState()
+                val todayStart = remember {
+                    Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                    }.timeInMillis
                 }
+                val weekAgoStart = remember {
+                    Calendar.getInstance().apply {
+                        add(Calendar.DAY_OF_YEAR, -7)
+                    }.timeInMillis
+                }
+
+                val todayCount = remember(allHistory) {
+                    allHistory.count { it.timestamp >= todayStart }
+                }
+                val weekCount = remember(allHistory) {
+                    allHistory.count { it.timestamp >= weekAgoStart }
+                }
+                val estimatedMinutes = remember(todayCount) {
+                    (todayCount * 1.5).roundToInt().coerceAtLeast(3)
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    // Stat Cards Row
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Daily Study Time card
+                            Card(
+                                modifier = Modifier.weight(1f),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(Icons.Default.Timer, "Time", tint = MaterialTheme.colorScheme.primary)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("وقت القراءة اليومي", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "$estimatedMinutes دقيقة",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            // Weekly Page Count card
+                            Card(
+                                modifier = Modifier.weight(1f),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(Icons.Default.MenuBook, "Pages", tint = MaterialTheme.colorScheme.secondary)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("صفحات هذا الأسبوع", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "$weekCount صفحة",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Activity Graph Section
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                Text(
+                                    "رسم بياني لنشاط القراءة الأسبوعي (Activity Graph)",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Right,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Days Arabic list & mapping
+                                val daysArabic = listOf("الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت")
+                                val pageReadsPerDay = remember(allHistory) {
+                                    val counts = IntArray(7)
+                                    val cal = Calendar.getInstance()
+                                    allHistory.forEach { h ->
+                                        cal.timeInMillis = h.timestamp
+                                        val idx = cal.get(Calendar.DAY_OF_WEEK) - 1
+                                        if (idx in 0..6) counts[idx]++
+                                    }
+                                    counts
+                                }
+                                val maxPages = remember(pageReadsPerDay) {
+                                    pageReadsPerDay.maxOrNull()?.coerceAtLeast(1) ?: 1
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(120.dp)
+                                        .padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.Bottom
+                                ) {
+                                    for (i in 0..6) {
+                                        val count = pageReadsPerDay[i]
+                                        val barHeightPercent = count.toFloat() / maxPages.toFloat()
+
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            if (count > 0) {
+                                                Text(
+                                                    text = "$count",
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                     color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                            }
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(16.dp)
+                                                    .fillMaxHeight(0.85f * barHeightPercent.coerceAtLeast(0.06f))
+                                                    .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                                    .background(
+                                                        if (count > 0) MaterialTheme.colorScheme.primary 
+                                                        else Color.Gray.copy(alpha = 0.2f)
+                                                    )
+                                            )
+                                             Spacer(modifier = Modifier.height(4.dp))
+                                             Text(
+                                                 text = daysArabic[i].take(2),
+                                                 fontSize = 9.sp,
+                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
+                                             )
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                     }
+
+                     // Section header for logged events
+                     item {
+                         Row(
+                             modifier = Modifier.fillMaxWidth(),
+                             horizontalArrangement = Arrangement.SpaceBetween,
+                             verticalAlignment = Alignment.CenterVertically
+                         ) {
+                             if (allHistory.isNotEmpty()) {
+                                 TextButton(onClick = { viewModel.clearAllReadingHistory() }) {
+                                     Text("تفريغ السجل الكامل", color = Color.Red, fontSize = 12.sp)
+                                 }
+                             }
+                             Spacer(modifier = Modifier.weight(1f))
+                             Text(
+                                 "سجل تواريخ فتح الملفات والتقدم",
+                                 fontWeight = FontWeight.Bold,
+                                 fontSize = 14.sp,
+                                 color = MaterialTheme.colorScheme.onBackground
+                             )
+                         }
+                     }
+
+                     // Reading logged items
+                     if (allHistory.isEmpty()) {
+                         item {
+                             Box(
+                                 modifier = Modifier
+                                     .fillMaxWidth()
+                                     .padding(24.dp),
+                                 contentAlignment = Alignment.Center
+                             ) {
+                                 Text(
+                                     "لا توجد عمليات قراءة مسجلة حتى الآن. ابدأ بفتح أي ملف لبناء سجلك التعليمي!",
+                                     fontSize = 12.sp,
+                                     color = Color.Gray,
+                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                 )
+                             }
+                         }
+                     } else {
+                         items(allHistory) { log ->
+                             val fileProgress = remember(allFiles) {
+                                 allFiles.find { it.id == log.pdfFileId }
+                             }
+                             val progressPercent = remember(fileProgress) {
+                                 if (fileProgress != null && fileProgress.totalPages > 0) {
+                                     ((fileProgress.currentPage + 1) * 100) / fileProgress.totalPages
+                                 } else 0
+                             }
+
+                             Card(
+                                 modifier = Modifier.fillMaxWidth(),
+                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                             ) {
+                                 Row(
+                                     modifier = Modifier
+                                         .fillMaxWidth()
+                                         .padding(12.dp)
+                                         .clickable {
+                                             val coreFile = allFiles.find { it.id == log.pdfFileId }
+                                             if (coreFile != null) {
+                                                 val targetFile = coreFile.copy(currentPage = log.pageIndex)
+                                                 onOpenFile(targetFile)
+                                             } else {
+                                                 Toast.makeText(context, "الذى تحاول فتحه غير متوفر.", Toast.LENGTH_SHORT).show()
+                                             }
+                                         },
+                                     verticalAlignment = Alignment.CenterVertically,
+                                     horizontalArrangement = Arrangement.SpaceBetween
+                                 ) {
+                                     val dateText = remember(log.timestamp) {
+                                         SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(log.timestamp))
+                                     }
+                                     Text(
+                                         text = dateText,
+                                         fontSize = 10.sp,
+                                         color = Color.Gray
+                                     )
+
+                                     Column(
+                                         horizontalAlignment = Alignment.End,
+                                         modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                                     ) {
+                                         Text(
+                                             text = log.pdfTitle,
+                                             fontSize = 12.sp,
+                                             fontWeight = FontWeight.Bold,
+                                             maxLines = 1,
+                                             overflow = TextOverflow.Ellipsis
+                                         )
+                                         Spacer(modifier = Modifier.height(2.dp))
+                                         Row(
+                                             horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                             verticalAlignment = Alignment.CenterVertically
+                                         ) {
+                                             Text(
+                                                 text = "التقدم التقريبي: $progressPercent%",
+                                                 fontSize = 10.sp,
+                                                 color = MaterialTheme.colorScheme.primary,
+                                                 fontWeight = FontWeight.SemiBold
+                                             )
+                                             Text("•", fontSize = 10.sp, color = Color.Gray)
+                                             Text(
+                                                 text = "الصفحةالمفتوحة: ${log.pageIndex + 1}",
+                                                 fontSize = 10.sp,
+                                                 color = Color.Gray
+                                             )
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                 }
             }
         }
 
