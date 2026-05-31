@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">WPS PDF Reader</string>
+    
+    <!-- Drawer / General Labels -->
+    <string name="drawer_title">PDF Workspace</string>
+    <string name="drawer_all_files">All Files</string>
+    <string name="drawer_folders">Library Mapped Folders</string>
+    <string name="drawer_import">Import PDF Document</string>
+    <string name="drawer_about">About App</string>
+    
+    <!-- Toast / Alerts -->
+    <string name="error_loading_pdf">Could not load PDF document. File may be corrupted.</string>
+    <string name="success_import">PDF file imported successfully!</string>
+    <string name="added_bookmark">Added to bookmarks</string>
+    <string name="removed_bookmark">Removed from bookmarks</string>
+    
+    <!-- Bottom Tabs -->
+    <string name="tab_recent">Recent</string>
+    <string name="tab_bookmarks">Bookmarks</string>
+    <string name="tab_search">Search</string>
+    <string name="tab_settings">Settings</string>
+    
+    <!-- Screens General -->
+    <string name="title_library">Document Library</string>
+    <string name="no_recent_files">No recent PDF files found.\nTap "+" to import a document.</string>
+    <string name="no_bookmarks">No bookmarked pages or files.</string>
+    <string name="folders_section">Folders</string>
+    <string name="search_hint">Search PDFs, documents, text...</string>
+    <string name="btn_create_folder">New Folder</string>
+    <string name="btn_import_pdf">Import PDF</string>
+    <string name="dialog_create_folder">Create Category Folder</string>
+    <string name="dialog_folder_name_hint">Folder name (e.g. Work, Study)</string>
+    <string name="btn_create">Create</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_move">Move to Folder</string>
+    
+    <!-- Reader Config -->
+    <string name="page_number">Page %1$d of %2$d</string>
+    <string name="reader_scroll_mode">Scroll Orientation</string>
+    <string name="reader_fullscreen">Reader Focus Mode</string>
+    <string name="reader_night_mode">Invert Canvas Colors</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Application Settings</string>
+    <string name="settings_theme">Visual Appearance Theme</string>
+    <string name="settings_theme_desc">Toggle between Light, Dark, or System Sync mode.</string>
+    <string name="settings_lang">Application Language</string>
+    <string name="settings_lang_desc">Change default translation locale.</string>
+    <string name="settings_storage">Permissions status &amp; storage info</string>
+    <string name="settings_build_real_desc">Features actual Android PdfRenderer integration with zero fake mockups.</string>
+    <string name="settings_copyright">WPS Reader - Built with Jetpack Compose</string>
+    <string name="theme_light">Light Mode</string>
+    <string name="theme_dark">Dark Mode</string>
+    <string name="theme_system">System Theme</string>
+    
+    <!-- Sample Documents -->
+    <string name="sample_starter_title">WPS-PDF Quick Start Guide</string>
+    <string name="sample_productivity_title">Android Productivity Tips</string>
+    
+    <!-- About screen -->
+    <string name="about_title">About WPS PDF Reader</string>
+    <string name="about_body">Welcome to the professional WPS PDF Reader built using Kotlin, Jetpack Compose, and native Android PdfRenderer.\n\nKey features:\n• Actual system PDF page rendering and caching\n• Night mode canvas inverting\n• Folder management database integration\n• High performance UI</string>
+</resources>

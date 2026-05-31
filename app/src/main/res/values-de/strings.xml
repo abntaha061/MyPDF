@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">WPS PDF-Reader</string>
+    
+    <!-- Drawer / General Labels -->
+    <string name="drawer_title">PDF-Workspace</string>
+    <string name="drawer_all_files">Alle Dateien</string>
+    <string name="drawer_folders">Bibliotheksordner</string>
+    <string name="drawer_import">PDF-Dokument importieren</string>
+    <string name="drawer_about">Über diese App</string>
+    
+    <!-- Toast / Alerts -->
+    <string name="error_loading_pdf">PDF konnte nicht geladen werden. Datei beschädigt.</string>
+    <string name="success_import">PDF-Datei erfolgreich importiert!</string>
+    <string name="added_bookmark">Zu Lesezeichen hinzugefügt</string>
+    <string name="removed_bookmark">Lesezeichen entfernt</string>
+    
+    <!-- Bottom Tabs -->
+    <string name="tab_recent">Zuletzt</string>
+    <string name="tab_bookmarks">Lesezeichen</string>
+    <string name="tab_search">Suche</string>
+    <string name="tab_settings">Einstellungen</string>
+    
+    <!-- Screens General -->
+    <string name="title_library">Dokumentenbibliothek</string>
+    <string name="no_recent_files">Keine PDF-Dateien gefunden.\nTippen Sie auf "+", um ein PDF zu importieren.</string>
+    <string name="no_bookmarks">Keine Lesezeichen vorhanden.</string>
+    <string name="folders_section">Ordner</string>
+    <string name="search_hint">PDFs, Dokumente, Text suchen...</string>
+    <string name="btn_create_folder">Neuer Ordner</string>
+    <string name="btn_import_pdf">PDF-Datei importieren</string>
+    <string name="dialog_create_folder">Kategorieordner erstellen</string>
+    <string name="dialog_folder_name_hint">Ordnername (z.B. Arbeit, Studium)</string>
+    <string name="btn_create">Erstellen</string>
+    <string name="btn_cancel">Abbrechen</string>
+    <string name="btn_close">Schließen</string>
+    <string name="btn_delete">Löschen</string>
+    <string name="btn_move">In Ordner verschieben</string>
+    
+    <!-- Reader Config -->
+    <string name="page_number">Seite %1$d von %2$d</string>
+    <string name="reader_scroll_mode">Scroll-Ausrichtung</string>
+    <string name="reader_fullscreen">Vollbildmodus aktivieren</string>
+    <string name="reader_night_mode">Farben invertieren (Blendschutz)</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">App-Einstellungen</string>
+    <string name="settings_theme">Visuelles App-Design</string>
+    <string name="settings_theme_desc">Zwischen Hell, Dunkel oder System-Sync wechseln.</string>
+    <string name="settings_lang">Sprache der Anwendung</string>
+    <string name="settings_lang_desc">Standardmäßige Übersetzungssprache ändern.</string>
+    <string name="settings_storage">Berechtigungsstatus &amp; Speicherdaten</string>
+    <string name="settings_build_real_desc">Bietet echte System-Integration mit der Android-PdfRenderer API ohne gefälschte Mockups.</string>
+    <string name="settings_copyright">WPS Reader - Entwickelt mit Jetpack Compose</string>
+    <string name="theme_light">Heller Modus</string>
+    <string name="theme_dark">Dunkler Modus</string>
+    <string name="theme_system">Systemdesign</string>
+    
+    <!-- Sample Documents -->
+    <string name="sample_starter_title">WPS-PDF Schnellstartanleitung</string>
+    <string name="sample_productivity_title">Android Produktivitätstipps</string>
+    
+    <!-- About screen -->
+    <string name="about_title">Über WPS PDF-Reader</string>
+    <string name="about_body">Willkommen bei dem professionellen WPS PDF-Reader, der vollständig mit Kotlin, Jetpack Compose und dem nativen Android-PdfRenderer entwickelt wurde.\n\nHauptfunktionen:\n• Echte PDF-Seitenberechnung und Bitmap-Rendering\n• Komfortabler Nachtmodus mit invertiertem Farbschema\n• Verwaltung lokaler Dokumentenkategorien in einer SQLite-Datenbank\n• Hochperformante Benutzeroberfläche</string>
+</resources>

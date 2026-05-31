@@ -1,0 +1,6 @@
+{
+  "name": "WPS PDF Reader",
+  "description": "A professional PDF reader application with WPS-style interface, folder organizations, bookmarks, search, and full support for Arabic, English, and German.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

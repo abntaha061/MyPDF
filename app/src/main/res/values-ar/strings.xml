@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">قارئ الـ PDF من WPS</string>
+    
+    <!-- Drawer / General Labels -->
+    <string name="drawer_title">مساحة عمل PDF</string>
+    <string name="drawer_all_files">جميع الملفات</string>
+    <string name="drawer_folders">المجلدات المصنفة</string>
+    <string name="drawer_import">استيراد مستند PDF</string>
+    <string name="drawer_about">حول التطبيق</string>
+    
+    <!-- Toast / Alerts -->
+    <string name="error_loading_pdf">تعذر تحميل مستند PDF. قد يكون الملف تالفاً.</string>
+    <string name="success_import">تم استيراد ملف PDF بنجاح!</string>
+    <string name="added_bookmark">تمت الإشارة المرجعية</string>
+    <string name="removed_bookmark">تمت إزالة الإشارة المرجعية</string>
+    
+    <!-- Bottom Tabs -->
+    <string name="tab_recent">الأخيرة</string>
+    <string name="tab_bookmarks">الإشارات المرجعية</string>
+    <string name="tab_search">البحث</string>
+    <string name="tab_settings">الإعدادات</string>
+    
+    <!-- Screens General -->
+    <string name="title_library">مكتبة المستندات</string>
+    <string name="no_recent_files">لم يتم العثور على ملفات حديثة.\nاضغط على "+" للاستيراد.</string>
+    <string name="no_bookmarks">لا توجد إشارات مرجعية محفوظة.</string>
+    <string name="folders_section">المجلدات</string>
+    <string name="search_hint">ابحث عن ملفات، مستندات، نصوص...</string>
+    <string name="btn_create_folder">مجلد جديد</string>
+    <string name="btn_import_pdf">استيراد ملف PDF</string>
+    <string name="dialog_create_folder">إنشاء مجلد تصنيف</string>
+    <string name="dialog_folder_name_hint">اسم المجلد (مثال: العمل، الدراسة)</string>
+    <string name="btn_create">إنشاء</string>
+    <string name="btn_cancel">إلغاء</string>
+    <string name="btn_close">إغلاق</string>
+    <string name="btn_delete">حذف</string>
+    <string name="btn_move">نقل إلى مجلد</string>
+    
+    <!-- Reader Config -->
+    <string name="page_number">صفحة %1$d من %2$d</string>
+    <string name="reader_scroll_mode">اتجاه التمرير</string>
+    <string name="reader_fullscreen">وضع القراءة بملء الشاشة</string>
+    <string name="reader_night_mode">عكس ألوان الخلفية (وضع مريح)</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">إعدادات التطبيق</string>
+    <string name="settings_theme">طابع المظهر البصري</string>
+    <string name="settings_theme_desc">التبديل بين الوضع الفاتح، الداكن، أو التزامن التلقائي.</string>
+    <string name="settings_lang">لغة التطبيق</string>
+    <string name="settings_lang_desc">تغيير لغة العرض والواجهة.</string>
+    <string name="settings_storage">حالة الأذونات ومعلومات التخزين</string>
+    <string name="settings_build_real_desc">يتميز بتكامل حقيقي مع مكتبة PdfRenderer الخاصة بنظام أندرويد بدون أي نماذج وهمية.</string>
+    <string name="settings_copyright">WPS Reader - مبني باستخدام Jetpack Compose</string>
+    <string name="theme_light">الوضع الفاتح</string>
+    <string name="theme_dark">الوضع الداكن</string>
+    <string name="theme_system">طبيعة النظام</string>
+    
+    <!-- Sample Documents -->
+    <string name="sample_starter_title">دليل البدء السريع لـ WPS PDF</string>
+    <string name="sample_productivity_title">نصائح الإنتاجية على أندرويد</string>
+    
+    <!-- About screen -->
+    <string name="about_title">حول قارئ الـ PDF من WPS</string>
+    <string name="about_body">مرحبًا بك في قارئ PDF الاحترافي المبني بالكامل باستخدام لغة Kotlin وJetpack Compose ومحرك Android PdfRenderer الأصلي.\n\nالميزات الأساسية:\n• عرض حقيقي لصفحات PDF وحفظها المؤقت\n• عكس لوحة الرسم ووضع القراءة الليلي المريح\n• إدارة الملفات والمجلدات وتتبعها محلياً بقاعدة البيانات\n• واجهة أداء فائقة خفيفة على الذاكرة</string>
+</resources>

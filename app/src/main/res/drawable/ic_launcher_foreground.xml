@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Stylized shadow -->
+    <path
+        android:fillColor="#1F000000"
+        android:pathData="M35,27 L69,27 L79,37 L79,91 C79,93.2 77.2,95 75,95 L35,95 C32.8,95 31,93.2 31,91 L31,31 C31,28.8 32.8,27 35,27 Z" />
+    
+    <!-- White Document Body Sheet -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,26 L68,26 L78,36 L78,90 C78,92.2 76.2,94 74,94 L34,94 C31.8,94 30,92.2 30,90 L30,30 C30,27.8 31.8,26 34,26 Z" />
+    
+    <!-- Folded Document Page Corner -->
+    <path
+        android:fillColor="#CFD8DC"
+        android:pathData="M68,26 L68,36 L78,36 Z" />
+
+    <!-- Three horizontal stylized text lines -->
+    <path
+        android:fillColor="#B0BEC5"
+        android:pathData="M38,48 L70,48 A2,2 0 0,1 70,52 L38,52 A2,2 0 0,1 38,48 Z" />
+    <path
+        android:fillColor="#B0BEC5"
+        android:pathData="M38,58 L70,58 A2,2 0 0,1 70,62 L38,62 A2,2 0 0,1 38,58 Z" />
+    <path
+        android:fillColor="#B0BEC5"
+        android:pathData="M38,68 L58,68 A2,2 0 0,1 58,72 L38,72 A2,2 0 0,1 38,68 Z" />
+
+    <!-- Bold Red PDF Badge Block -->
+    <path
+        android:fillColor="#E53935"
+        android:pathData="M30,76 L78,76 L78,86 L30,86 Z" />
+        
+    <!-- Tiny custom visual dots or details inside the ribbon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,79 L40,79 A1,1 0 0,1 40,83 L36,83 A1,1 0 0,1 36,79 Z M44,79 L48,79 A1,1 0 0,1 48,83 L44,83 A1,1 0 0,1 44,79 Z M52,79 L56,79 A1,1 0 0,1 56,83 L52,83 A1,1 0 0,1 52,79 Z" />
+</vector>
