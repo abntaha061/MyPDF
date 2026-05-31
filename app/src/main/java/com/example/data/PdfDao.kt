@@ -61,6 +61,9 @@ interface PdfDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHistoryEntry(readingHistory: ReadingHistory): Long
 
+    @Query("SELECT * FROM reading_history ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getLastHistoryEntry(): ReadingHistory?
+
     @Query("DELETE FROM reading_history")
     suspend fun clearAllHistory()
 }

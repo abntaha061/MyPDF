@@ -93,7 +93,16 @@ fun ReadingScreen(
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val currentActivity = context as? Activity
+    val currentActivity = remember(context) {
+        var curr = context
+        while (curr is android.content.ContextWrapper) {
+            if (curr is Activity) {
+                break
+            }
+            curr = curr.baseContext
+        }
+        curr as? Activity
+    }
     val scope = rememberCoroutineScope()
 
     val pdfFile = viewModel.currentPdfFile ?: return
@@ -104,7 +113,9 @@ fun ReadingScreen(
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+        runCatching {
+            focusRequester.requestFocus()
+        }
     }
 
     // Keep screen awake config
@@ -1700,6 +1711,7 @@ fun AiTab(viewModel: PdfRendererViewModel) {
     val context = LocalContext.current
     var selectedSummaryLang by remember { mutableStateOf("ar") }
     var selectedSummaryFormat by remember { mutableStateOf("short") }
+    var selectedSummaryScope by remember { mutableStateOf("full") }
     var aiFeatureSelectedSubtab by remember { mutableStateOf(0) } // 0: Summarize, 1: Q&A, 2: Smart OCR, 3: Deutsch
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1746,8 +1758,21 @@ fun AiTab(viewModel: PdfRendererViewModel) {
                     }
                 }
 
+                // Scope parameters
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    val scopes = listOf("page" to "الصفحة الحالية", "chapter" to "الفصل الحالي", "full" to "المستند كاملاً")
+                    scopes.forEach { (code, name) ->
+                        FilterChip(
+                            selected = selectedSummaryScope == code,
+                            onClick = { selectedSummaryScope = code },
+                            label = { Text(name, fontSize = 11.sp) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
                 Button(
-                    onClick = { viewModel.summarizeCurrentDocument(selectedSummaryLang, selectedSummaryFormat) },
+                    onClick = { viewModel.summarizeCurrentDocument(selectedSummaryLang, selectedSummaryFormat, selectedSummaryScope) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (viewModel.isSummarizing) {
@@ -2117,25 +2142,48 @@ fun GermanLessonsHub(words: List<GermanWord>) {
                 var scoreCounter by remember { mutableStateOf(0) }
                 var isQuizFinished by remember { mutableStateOf(false) }
 
-                val questionsList = listOf(
-                    QuizQuestion(
-                        question = "ما هو معنى الكلمة الألمانية 'der Bildschirm'؟",
-                        options = listOf("الشاشة والمظهر", "الاجتماع والمناقشة", "يحفظ عن ظهر قلب"),
-                        correctIndex = 0
-                    ),
-                    QuizQuestion(
-                        question = "ما معنى التعبير القواعدي 'auswendig lernen'؟",
-                        options = listOf("يفهم القوانين", "يحفظ عن ظهر قلب وبصم", "تحميل المستند الرقمي"),
-                        correctIndex = 1
-                    ),
-                    QuizQuestion(
-                        question = "ما معنى المصطلح الألماني 'die Besprechung'؟",
-                        options = listOf("الاجتماع والمناقشة", "الشاشة", "الكتابة والتحرير"),
-                        correctIndex = 0
-                    )
-                )
+                val questionsList = remember(words) {
+                    words.mapIndexed { idx, word ->
+                        val optionsList = mutableListOf<String>()
+                        optionsList.add(word.translation)
+                        
+                        // Select random other translations from extracted list
+                        val otherTranslations = words.filter { it.word != word.word }
+                            .map { it.translation }
+                            .shuffled()
+                        
+                        for (trans in otherTranslations) {
+                            if (optionsList.size < 3) {
+                                optionsList.add(trans)
+                            }
+                        }
+                        
+                        val staticOptionsFallback = listOf("الاجتماع والمناقشة", "الشاشة والمظهر", "يحفظ عن ظهر قلب وبصم", "تحميل المستند الرقمي", "يفهم القواعد والرموز")
+                        for (opt in staticOptionsFallback) {
+                            if (optionsList.size < 3 && !optionsList.contains(opt)) {
+                                optionsList.add(opt)
+                            }
+                        }
+                        
+                        val shuffledOptions = optionsList.shuffled()
+                        val correctIdx = shuffledOptions.indexOf(word.translation)
+                        
+                        QuizQuestion(
+                            question = "ما هو معنى الكلمة الألمانية '${word.word}'؟",
+                            options = shuffledOptions,
+                            correctIndex = if (correctIdx != -1) correctIdx else 0
+                        )
+                    }
+                }
 
-                if (isQuizFinished) {
+                if (questionsList.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("يرجى استخراج قائمة الكلمات اللغوية أولاً لبدء الاختبار السريع!", fontSize = 12.sp, color = Color.Gray)
+                    }
+                } else if (isQuizFinished) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))

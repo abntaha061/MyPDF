@@ -39,6 +39,10 @@ class PdfRepository(private val context: Context, private val pdfDao: PdfDao) {
     fun getReadingHistorySince(sinceTimestamp: Long): Flow<List<ReadingHistory>> = pdfDao.getReadingHistorySince(sinceTimestamp)
 
     suspend fun insertHistoryEntry(pdfFileId: Int, pdfTitle: String, pageIndex: Int) = withContext(Dispatchers.IO) {
+        val lastEntry = pdfDao.getLastHistoryEntry()
+        if (lastEntry != null && lastEntry.pdfFileId == pdfFileId && lastEntry.pageIndex == pageIndex) {
+            return@withContext
+        }
         val entry = ReadingHistory(pdfFileId = pdfFileId, pdfTitle = pdfTitle, pageIndex = pageIndex)
         pdfDao.insertHistoryEntry(entry)
     }
