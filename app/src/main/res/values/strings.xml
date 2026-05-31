@@ -1,4 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">إعدادات القارئ</string>
+    <string name="app_name">WPS PDF Reader</string>
+    
+    <!-- Home Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_dictionary">Dictionary</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home/Recent Screen -->
+    <string name="recent_files">Recent Documents</string>
+    <string name="no_recent_files">No recent PDF documents found. Select or upload a PDF to get started!</string>
+    <string name="upload_or_select_pdf">Pick PDF File</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="starred_documents">Favorites</string>
+    <string name="folders_section">Folder Organization</string>
+    <string name="create_folder">Create Folder</string>
+    <string name="folder_name_hint">Folder Name</string>
+    <string name="cancel">Cancel</string>
+    <string name="create">Create</string>
+    <string name="delete">Delete</string>
+    <string name="rename">Rename</string>
+    <string name="add_to_folder">Move to Folder</string>
+    <string name="all_files">All PDF Documents</string>
+
+    <!-- Reader Screen -->
+    <string name="page_number_format">Page %1$d of %2$d</string>
+    <string name="add_bookmark">Add Bookmark</string>
+    <string name="remove_bookmark">Remove Bookmark</string>
+    <string name="bookmarks_list">Bookmarks</string>
+    <string name="gemini_assistant_title">Gemini AI Assistant</string>
+    <string name="gemini_placeholder">Ask Gemini about this page or document...</string>
+    <string name="gemini_ask_button">Ask</string>
+    <string name="gemini_suggested_summary">Summarize Page</string>
+    <string name="gemini_suggested_explain">Explain Complex Terms</string>
+    <string name="gemini_suggested_translate">Translate to My Language</string>
+    <string name="no_bookmarks">No bookmarks added for this document.</string>
+
+    <!-- Dictionary -->
+    <string name="dictionary_title">Dictionary &amp; Translation</string>
+    <string name="dictionary_word_hint">Enter word or select text from PDF...</string>
+    <string name="dictionary_search_btn">Lookup &amp; Translate</string>
+    <string name="dictionary_explanation_header">AI Terminology &amp; Meaning</string>
+    <string name="dictionary_translation_header">Multilingual Translations</string>
+    <string name="dictionary_empty_state">Search a word directly or select any text inside the reader viewport to explain &amp; translate instantly.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Setup &amp; Preferences</string>
+    <string name="settings_section_general">General Settings</string>
+    <string name="settings_section_ai">Gemini AI Configuration</string>
+    <string name="settings_language">Application Language</string>
+    <string name="settings_theme">Visual Aesthetic Theme</string>
+    <string name="settings_gemini_key">Gemini API Key</string>
+    <string name="settings_gemini_key_hint">Enter your personal Gemini API Key...</string>
+    <string name="settings_gemini_status_verified">Active &amp; Configured</string>
+    <string name="settings_gemini_status_missing">Using Server-side Default Platform Key</string>
+    <string name="save">Save Changes</string>
+
+    <!-- File Dialog & Permissions -->
+    <string name="permissions_title">Storage Permissions Required</string>
+    <string name="permissions_rationale">WPS PDF Reader requires file storage permissions to locate, read, render, and bookmark PDF documents on your device.</string>
+    <string name="permissions_grant_btn">Grant Access</string>
+    <string name="file_info_title">Document Properties</string>
+    <string name="file_info_name">File Name</string>
+    <string name="file_info_size">Size</string>
+    <string name="file_info_path">Location</string>
+    <string name="file_info_pages">Total Pages</string>
 </resources>

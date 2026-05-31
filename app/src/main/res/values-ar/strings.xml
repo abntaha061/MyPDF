@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">قارئ WPS PDF</string>
+    
+    <!-- Home Navigation -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_library">المكتبة</string>
+    <string name="nav_search">البحث</string>
+    <string name="nav_dictionary">القاموس</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <!-- Home/Recent Screen -->
+    <string name="recent_files">المستندات الأخيرة</string>
+    <string name="no_recent_files">لم يتم العثور على مستندات PDF أخيرة. اختر أو ارفع ملف PDF للبدء!</string>
+    <string name="upload_or_select_pdf">اختر ملف PDF</string>
+    <string name="quick_actions">إجراءات سريعة</string>
+    <string name="starred_documents">المفضلة</string>
+    <string name="folders_section">تنظيم المجلدات</string>
+    <string name="create_folder">إنشاء مجلد</string>
+    <string name="folder_name_hint">اسم المجلد</string>
+    <string name="cancel">إلغاء</string>
+    <string name="create">إنشاء</string>
+    <string name="delete">حذف</string>
+    <string name="rename">إعادة تسمية</string>
+    <string name="add_to_folder">نقل إلى المجلد</string>
+    <string name="all_files">جميع مستندات PDF</string>
+
+    <!-- Reader Screen -->
+    <string name="page_number_format">صفحة %1$d من %2$d</string>
+    <string name="add_bookmark">إضافة إشارة مرجعية</string>
+    <string name="remove_bookmark">حذف الإشارة المرجعية</string>
+    <string name="bookmarks_list">الإشارات المرجعية</string>
+    <string name="gemini_assistant_title">مساعد Gemini الذكي</string>
+    <string name="gemini_placeholder">اسأل Gemini عن هذه الصفحة أو المستند...</string>
+    <string name="gemini_ask_button">اسأل</string>
+    <string name="gemini_suggested_summary">تلخيص الصفحة</string>
+    <string name="gemini_suggested_explain">شرح المصطلحات المعقدة</string>
+    <string name="gemini_suggested_translate">ترجم إلى لغتي</string>
+    <string name="no_bookmarks">لا توجد إشارات مرجعية مضافة لهذا المستند.</string>
+
+    <!-- Dictionary -->
+    <string name="dictionary_title">القاموس والترجمة</string>
+    <string name="dictionary_word_hint">أدخل الكلمة أو حدد نصاً من ملف PDF...</string>
+    <string name="dictionary_search_btn">بحث وترجمة</string>
+    <string name="dictionary_explanation_header">شرح المصطلحات بالذكاء الاصطناعي</string>
+    <string name="dictionary_translation_header">ترجمات متعددة اللغات</string>
+    <string name="dictionary_empty_state">ابحث عن كلمة مباشرة أو حدد أي نص داخل قارئ المستندات لشرحه وترجمته فوراً.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">الإعدادات والتفضيلات</string>
+    <string name="settings_section_general">الإعدادات العامة</string>
+    <string name="settings_section_ai">تكوين ذكاء Gemini الاصطناعي</string>
+    <string name="settings_language">لغة التطبيق</string>
+    <string name="settings_theme">المظهر البصري</string>
+    <string name="settings_gemini_key">مفتاح API الخاص بـ Gemini</string>
+    <string name="settings_gemini_key_hint">أدخل مفتاح Gemini API الشخصي الخاص بك...</string>
+    <string name="settings_gemini_status_verified">مفتاح فعال ومعد</string>
+    <string name="settings_gemini_status_missing">استخدام مفتاح المنصة الافتراضي المدمج</string>
+    <string name="save">حفظ التغييرات</string>
+
+    <!-- File Dialog & Permissions -->
+    <string name="permissions_title">إذن الوصول إلى الملفات مطلوب</string>
+    <string name="permissions_rationale">يتطلب قارئ WPS PDF إذن الوصول للملفات لتحديد موقع ملفات PDF الخاصة بك وقراءتها وعرضها وحفظ إشاراتها المرجعية.</string>
+    <string name="permissions_grant_btn">منح الإذن</string>
+    <string name="file_info_title">خصائص المستند</string>
+    <string name="file_info_name">اسم الملف</string>
+    <string name="file_info_size">الحجم</string>
+    <string name="file_info_path">الموقع</string>
+    <string name="file_info_pages">عدد الصفحات</string>
+</resources>

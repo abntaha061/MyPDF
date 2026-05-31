@@ -1,6 +1,12 @@
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -13,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WPS Reader Settings"
+rootProject.name = "WPS-PDF-Reader"
 include(":app")

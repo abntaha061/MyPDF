@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WPS PDF Reader</string>
+    
+    <!-- Home Navigation -->
+    <string name="nav_home">Startseite</string>
+    <string name="nav_library">Bibliothek</string>
+    <string name="nav_search">Suche</string>
+    <string name="nav_dictionary">Wörterbuch</string>
+    <string name="nav_settings">Einstellungen</string>
+
+    <!-- Home/Recent Screen -->
+    <string name="recent_files">Letzte Dokumente</string>
+    <string name="no_recent_files">Keine kürzlich geöffneten PDFs gefunden. Wählen Sie eine PDF-Datei aus, um zu beginnen!</string>
+    <string name="upload_or_select_pdf">PDF-Datei auswählen</string>
+    <string name="quick_actions">Schnellaktionen</string>
+    <string name="starred_documents">Favoriten</string>
+    <string name="folders_section">Ordnerstruktur</string>
+    <string name="create_folder">Ordner erstellen</string>
+    <string name="folder_name_hint">Ordnername</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="create">Erstellen</string>
+    <string name="delete">Löschen</string>
+    <string name="rename">Umbenennen</string>
+    <string name="add_to_folder">In Ordner verschieben</string>
+    <string name="all_files">Alle PDF-Dokumente</string>
+
+    <!-- Reader Screen -->
+    <string name="page_number_format">Seite %1$d von %2$d</string>
+    <string name="add_bookmark">Lesezeichen hinzufügen</string>
+    <string name="remove_bookmark">Lesezeichen entfernen</string>
+    <string name="bookmarks_list">Lesezeichen</string>
+    <string name="gemini_assistant_title">Gemini KI-Assistent</string>
+    <string name="gemini_placeholder">Fragen Sie Gemini etwas zu dieser Seite oder diesem Dokument...</string>
+    <string name="gemini_ask_button">Fragen</string>
+    <string name="gemini_suggested_summary">Seite zusammenfassen</string>
+    <string name="gemini_suggested_explain">Schwierige Begriffe erklären</string>
+    <string name="gemini_suggested_translate">In meine Sprache übersetzen</string>
+    <string name="no_bookmarks">Keine Lesezeichen für dieses Dokument hinzugefügt.</string>
+
+    <!-- Dictionary -->
+    <string name="dictionary_title">Wörterbuch &amp; Übersetzung</string>
+    <string name="dictionary_word_hint">Wort eingeben oder Text in PDF auswählen...</string>
+    <string name="dictionary_search_btn">Suchen &amp; Übersetzen</string>
+    <string name="dictionary_explanation_header">KI-Begriffserklärung</string>
+    <string name="dictionary_translation_header">Mehrsprachige Übersetzungen</string>
+    <string name="dictionary_empty_state">Suchen Sie direkt nach einem Begriff, oder wählen Sie Text im Lese-Reader aus, um ihn sofort erklären oder übersetzen zu lassen.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Konfiguration &amp; Präferenzen</string>
+    <string name="settings_section_general">Allgemeine Einstellungen</string>
+    <string name="settings_section_ai">Gemini KI-Konfiguration</string>
+    <string name="settings_language">Anwendungssprache</string>
+    <string name="settings_theme">Visuelles Erscheinungsbild</string>
+    <string name="settings_gemini_key">Gemini-API-Schlüssel</string>
+    <string name="settings_gemini_key_hint">Geben Sie Ihren eigenen Gemini-API-Schlüssel ein...</string>
+    <string name="settings_gemini_status_verified">Aktiviert &amp; Verifiziert</string>
+    <string name="settings_gemini_status_missing">Verwende standardmäßigen Server-API-Schlüssel</string>
+    <string name="save">Änderungen speichern</string>
+
+    <!-- File Dialog & Permissions -->
+    <string name="permissions_title">Dateiberechtigungen erforderlich</string>
+    <string name="permissions_rationale">WPS PDF Reader benötigt Speicherberechtigungen, um PDF-Dateien auf Ihrem Gerät zu lokalisieren, zu laden, anzuzeigen und zu verwalten.</string>
+    <string name="permissions_grant_btn">Zugriff gewähren</string>
+    <string name="file_info_title">Dokumenteigenschaften</string>
+    <string name="file_info_name">Dateiname</string>
+    <string name="file_info_size">Größe</string>
+    <string name="file_info_path">Ort</string>
+    <string name="file_info_pages">Gesamtseiten</string>
+</resources>
