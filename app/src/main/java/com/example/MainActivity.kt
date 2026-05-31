@@ -91,6 +91,10 @@ fun WpsAppNavigation(viewModel: PdfRendererViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     
+    val startDest = remember {
+        if (hasAllStoragePermissionsGranted(context)) "workspace" else "permissions"
+    }
+
     var hasPermission by remember { mutableStateOf(hasAllStoragePermissionsGranted(context)) }
     
     // Automatic checking on app resume/active focus (such as when returning from Settings)
@@ -98,7 +102,13 @@ fun WpsAppNavigation(viewModel: PdfRendererViewModel) {
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                hasPermission = hasAllStoragePermissionsGranted(context)
+                val currentPermission = hasAllStoragePermissionsGranted(context)
+                if (currentPermission && !hasPermission) {
+                    hasPermission = true
+                    navController.navigate("workspace") {
+                        popUpTo("permissions") { inclusive = true }
+                    }
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -109,7 +119,7 @@ fun WpsAppNavigation(viewModel: PdfRendererViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = if (hasPermission) "workspace" else "permissions"
+        startDestination = startDest
     ) {
         composable("permissions") {
             com.example.ui.screens.PermissionsOnboardingScreen(

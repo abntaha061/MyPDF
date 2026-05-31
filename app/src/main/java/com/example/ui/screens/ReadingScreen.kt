@@ -94,12 +94,19 @@ fun ReadingScreen(
 ) {
     val context = LocalContext.current
     val currentActivity = remember(context) {
-        var curr = context
-        while (curr is android.content.ContextWrapper) {
+        var curr: android.content.Context? = context
+        var depth = 0
+        while (curr is android.content.ContextWrapper && depth < 20) {
             if (curr is Activity) {
                 break
             }
-            curr = curr.baseContext
+            val base = curr.baseContext
+            if (base == null || base === curr) {
+                curr = null
+                break
+            }
+            curr = base
+            depth++
         }
         curr as? Activity
     }
@@ -113,6 +120,7 @@ fun ReadingScreen(
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(100)
         runCatching {
             focusRequester.requestFocus()
         }

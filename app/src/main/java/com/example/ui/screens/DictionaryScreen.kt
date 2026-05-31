@@ -192,7 +192,8 @@ fun DictionaryScreen(
                 }
             } else {
                 // SPACED REPETITION STUDY DECK REVIEW
-                val reviewList: List<DictionaryEntry> = remember { dm.getScheduledReviewList() }
+                var refreshTrigger by remember { mutableStateOf(0) }
+                val reviewList: List<DictionaryEntry> = remember(refreshTrigger) { dm.getScheduledReviewList() }
 
                 if (reviewList.isEmpty()) {
                     Box(
@@ -245,7 +246,7 @@ fun DictionaryScreen(
                         ) {
                             items(items = reviewList) { entry ->
                                 DictionaryReviewItemRow(entry = entry, dm = dm, onRefresh = {
-                                    // Refresh states trigger
+                                    refreshTrigger++
                                     Toast.makeText(context, "تم حفظ نتيجة استيعاب الكلمة!", Toast.LENGTH_SHORT).show()
                                 })
                             }
