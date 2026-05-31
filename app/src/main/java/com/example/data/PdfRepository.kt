@@ -35,6 +35,40 @@ class PdfRepository(private val context: Context, private val pdfDao: PdfDao) {
         pdfDao.updateFile(pdfFile)
     }
 
+    suspend fun toggleFavorite(pdfId: Int, isFavorite: Boolean) = withContext(Dispatchers.IO) {
+        pdfDao.getFileById(pdfId)?.let {
+            pdfDao.updateFile(it.copy(isFavorite = isFavorite))
+        }
+    }
+
+    suspend fun updateTags(pdfId: Int, tags: String) = withContext(Dispatchers.IO) {
+        pdfDao.getFileById(pdfId)?.let {
+            pdfDao.updateFile(it.copy(tags = tags))
+        }
+    }
+
+    suspend fun updateCategory(pdfId: Int, category: String) = withContext(Dispatchers.IO) {
+        pdfDao.getFileById(pdfId)?.let {
+            pdfDao.updateFile(it.copy(category = category))
+        }
+    }
+
+    suspend fun incrementCommentCount(pdfId: Int) = withContext(Dispatchers.IO) {
+        pdfDao.getFileById(pdfId)?.let {
+            pdfDao.updateFile(it.copy(commentCount = it.commentCount + 1))
+        }
+    }
+
+    fun autoCategorize(title: String): String {
+        val t = title.lowercase()
+        return when {
+            t.contains("book") || t.contains("novel") || t.contains("كتاب") || t.contains("رواية") || t.contains("guide") || t.contains("دليل") -> "كتب"
+            t.contains("report") || t.contains("تقارير") || t.contains("تقرير") || t.contains("statis") || t.contains("تحليل") -> "تقارير"
+            t.contains("test") || t.contains("exam") || t.contains("quiz") || t.contains("امتحان") || t.contains("اختبار") || t.contains("tips") -> "اختبارات"
+            else -> "مستندات"
+        }
+    }
+
     suspend fun deleteFile(pdfFile: PdfFile) = withContext(Dispatchers.IO) {
         try {
             val file = File(pdfFile.filePath)
@@ -135,16 +169,18 @@ class PdfRepository(private val context: Context, private val pdfDao: PdfDao) {
                 Log.e("PdfRepository", "Could not count pages of imported file: ${e.message}")
             }
 
+            val titleText = destinationFile.name.substringBeforeLast(".")
             val newPdf = PdfFile(
                 filePath = destinationFile.absolutePath,
-                title = destinationFile.name.substringBeforeLast("."),
+                title = titleText,
                 fileSize = fileSize,
                 addedDate = System.currentTimeMillis(),
                 lastReadDate = 0L,
                 currentPage = 0,
                 totalPages = totalPages,
                 isBookmarked = false,
-                folderName = "Imports" // Default category folder
+                folderName = "Imports", // Default category folder
+                category = autoCategorize(titleText)
             )
 
             val id = pdfDao.insertFile(newPdf)

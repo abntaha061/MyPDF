@@ -96,6 +96,8 @@ fun ReadingScreen(
     val pdfFile = viewModel.currentPdfFile ?: return
     val totalPages = viewModel.totalPagesCount
 
+    var isSearchActive by remember { mutableStateOf(false) }
+
     // Keep screen awake config
     DisposableEffect(viewModel.keepScreenOn) {
         if (viewModel.keepScreenOn) {
@@ -238,31 +240,155 @@ fun ReadingScreen(
 
     Scaffold(
         topBar = {
-            AnimatedVisibility(
-                visible = areToolbarsVisible && !viewModel.isFullscreenMode,
-                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
-            ) {
-                WpsReaderTopBar(
-                    pdfFile = pdfFile,
-                    currentPage = viewModel.currentPageIndex,
-                    totalPages = totalPages,
-                    onBackClick = onBackClick,
-                    onBookmarkToggle = { viewModel.toggleBookmark(pdfFile) },
-                    onToolsClick = { isToolsSheetOpen = true },
-                    onShareClick = {
-                        try {
-                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "application/pdf"
-                                putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(pdfFile.filePath)))
-                                putExtra(Intent.EXTRA_SUBJECT, pdfFile.title)
+            Column {
+                AnimatedVisibility(
+                    visible = areToolbarsVisible && !viewModel.isFullscreenMode,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                ) {
+                    WpsReaderTopBar(
+                        pdfFile = pdfFile,
+                        currentPage = viewModel.currentPageIndex,
+                        totalPages = totalPages,
+                        onBackClick = onBackClick,
+                        onBookmarkToggle = { viewModel.toggleBookmark(pdfFile) },
+                        onToolsClick = { isToolsSheetOpen = true },
+                        onShareClick = {
+                            try {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "application/pdf"
+                                    putExtra(Intent.EXTRA_STREAM, Uri.fromFile(File(pdfFile.filePath)))
+                                    putExtra(Intent.EXTRA_SUBJECT, pdfFile.title)
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "مشاركة الملف عبر:"))
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "مشاركة الملف الحالية...", Toast.LENGTH_SHORT).show()
                             }
-                            context.startActivity(Intent.createChooser(shareIntent, "مشاركة الملف عبر:"))
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "مشاركة الملف الحالية...", Toast.LENGTH_SHORT).show()
+                        },
+                        onSearchClick = { isSearchActive = !isSearchActive }
+                    )
+                }
+
+                // Interactive Slide-down Search Bar Panel
+                AnimatedVisibility(
+                    visible = isSearchActive,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 2.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = viewModel.pdfSearchQuery,
+                                    onValueChange = {
+                                        viewModel.performPdfSearch(it)
+                                    },
+                                    placeholder = { Text("بحث داخل صفحات الملف...", fontSize = 13.sp) },
+                                    singleLine = true,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(52.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.Gray) },
+                                    trailingIcon = {
+                                        if (viewModel.pdfSearchQuery.isNotEmpty()) {
+                                            IconButton(onClick = { viewModel.clearPdfSearch() }) {
+                                                Icon(Icons.Default.Close, null)
+                                            }
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                if (viewModel.pdfTextSearchResults.isNotEmpty()) {
+                                    Text(
+                                        text = "${viewModel.currentPdfSearchIndex + 1} من ${viewModel.pdfTextSearchResults.size}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(horizontal = 4.dp)
+                                    )
+
+                                    IconButton(onClick = { viewModel.goToPrevSearchResult() }) {
+                                        Icon(Icons.Default.KeyboardArrowUp, null)
+                                    }
+                                    IconButton(onClick = { viewModel.goToNextSearchResult() }) {
+                                        Icon(Icons.Default.KeyboardArrowDown, null)
+                                    }
+                                } else if (viewModel.pdfSearchQuery.isNotEmpty()) {
+                                    Text(
+                                        text = "0 نتائج",
+                                        fontSize = 11.sp,
+                                        color = Color.Red,
+                                        modifier = Modifier.padding(horizontal = 4.dp)
+                                    )
+                                }
+
+                                IconButton(onClick = {
+                                    isSearchActive = false
+                                    viewModel.clearPdfSearch()
+                                }) {
+                                    Icon(Icons.Default.Cancel, null, tint = Color.Gray)
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(
+                                        checked = viewModel.isCaseSensitive,
+                                        onCheckedChange = {
+                                            viewModel.isCaseSensitive = it
+                                            viewModel.performPdfSearch(viewModel.pdfSearchQuery)
+                                        }
+                                    )
+                                    Text("حساس للحالة", fontSize = 11.sp)
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(
+                                        checked = viewModel.isExactPhrase,
+                                        onCheckedChange = {
+                                            viewModel.isExactPhrase = it
+                                            viewModel.performPdfSearch(viewModel.pdfSearchQuery)
+                                        }
+                                    )
+                                    Text("طابق تام", fontSize = 11.sp)
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(
+                                        checked = viewModel.searchCrossLanguage,
+                                        onCheckedChange = {
+                                            viewModel.searchCrossLanguage = it
+                                            viewModel.performPdfSearch(viewModel.pdfSearchQuery)
+                                        }
+                                    )
+                                    Text("بحث معرب 🇩🇪🇸🇦", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                }
+                            }
                         }
                     }
-                )
+                }
             }
         },
         bottomBar = {
@@ -953,6 +1079,79 @@ fun ViewNavTab(viewModel: PdfRendererViewModel) {
                 )
             }
         )
+
+        // --- TABLE OF CONTENTS DIGITAL ACCORDION MODULE ---
+        var isTocExpanded by remember { mutableStateOf(true) }
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isTocExpanded = !isTocExpanded },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Toc, "TOC", tint = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("فهرس المحتويات الرقمي (TOC)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                    Icon(
+                        imageVector = if (isTocExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = "Toggle"
+                    )
+                }
+
+                if (isTocExpanded) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val chapters = remember(viewModel.currentPdfFile, viewModel.totalPagesCount) {
+                        viewModel.getTableOfContents()
+                    }
+                    chapters.forEach { chapter ->
+                        val isCurrentChapter = chapter.pageIndex == viewModel.currentPageIndex
+                        val borderCol = if (isCurrentChapter) MaterialTheme.colorScheme.primary else Color.Transparent
+                        val bgCol = if (isCurrentChapter) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(bgCol)
+                                .border(BorderStroke(1.dp, borderCol), RoundedCornerShape(6.dp))
+                                .clickable {
+                                    viewModel.updatePageProgress(chapter.pageIndex)
+                                }
+                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = chapter.title,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isCurrentChapter) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isCurrentChapter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = "ص ${chapter.pageIndex + 1}",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isCurrentChapter) MaterialTheme.colorScheme.primary else Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -1978,6 +2177,20 @@ fun PdfPageCard(
                     )
                 }
 
+                // RENDER TEMPORARY SEARCH RESULT HIGHLIGHTS
+                viewModel.pdfTextSearchResults.forEachIndexed { sIdx, result ->
+                    if (result.pageIndex == pageIndex) {
+                        val isCurrent = (sIdx == viewModel.currentPdfSearchIndex)
+                        val matchY = 160f + (result.startIndex % 5) * 80f
+                        val matchX = 100f + (result.startIndex % 3) * 120f
+                        drawRect(
+                            color = if (isCurrent) Color(0xFFFF9800).copy(alpha = 0.5f) else Color(0xFFFFEB3B).copy(alpha = 0.5f),
+                            topLeft = Offset(matchX, matchY),
+                            size = Size(180f, 36f)
+                        )
+                    }
+                }
+
                 // RENDER HIGHLIGHT PATH UNDERLAYS
                 viewModel.pageAnnotationsText[pageIndex]?.forEach { textAnn ->
                     // Simulated highlights
@@ -2306,7 +2519,8 @@ fun WpsReaderTopBar(
     onBackClick: () -> Unit,
     onBookmarkToggle: () -> Unit,
     onToolsClick: () -> Unit,
-    onShareClick: () -> Unit
+    onShareClick: () -> Unit,
+    onSearchClick: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -2331,6 +2545,9 @@ fun WpsReaderTopBar(
             }
         },
         actions = {
+            IconButton(onClick = onSearchClick) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = "البحث داخل الملف", tint = Color.White)
+            }
             IconButton(onClick = onBookmarkToggle) {
                 Icon(
                     imageVector = if (pdfFile.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,

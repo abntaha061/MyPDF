@@ -64,15 +64,60 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun hasAllStoragePermissionsGranted(context: android.content.Context): Boolean {
+    val readOk = androidx.core.content.ContextCompat.checkSelfPermission(
+        context,
+        android.Manifest.permission.READ_EXTERNAL_STORAGE
+    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    
+    val writeOk = androidx.core.content.ContextCompat.checkSelfPermission(
+        context,
+        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    
+    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+        android.os.Environment.isExternalStorageManager()
+    } else {
+        readOk && writeOk
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WpsAppNavigation(viewModel: PdfRendererViewModel) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    
+    var hasPermission by remember { mutableStateOf(hasAllStoragePermissionsGranted(context)) }
+    
+    // Automatic checking on app resume/active focus (such as when returning from Settings)
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasPermission = hasAllStoragePermissionsGranted(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     NavHost(
         navController = navController,
-        startDestination = "workspace"
+        startDestination = if (hasPermission) "workspace" else "permissions"
     ) {
+        composable("permissions") {
+            com.example.ui.screens.PermissionsOnboardingScreen(
+                onPermissionsGranted = {
+                    hasPermission = true
+                    navController.navigate("workspace") {
+                        popUpTo("permissions") { inclusive = true }
+                    }
+                }
+            )
+        }
         composable("workspace") {
             WpsWorkspaceTabs(
                 viewModel = viewModel,

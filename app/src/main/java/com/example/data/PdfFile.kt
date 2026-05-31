@@ -15,7 +15,12 @@ data class PdfFile(
     val totalPages: Int = 0,
     val isBookmarked: Boolean = false,
     val folderName: String = "",
-    val isSample: Boolean = false
+    val isSample: Boolean = false,
+    val isFavorite: Boolean = false,
+    val category: String = "مستندات", // Documents, Books, Reports, Tests/Quizzes
+    val tags: String = "", // Comma-separated tags
+    val commentCount: Int = 0,
+    val bookmarkCount: Int = 0
 ) {
     val formattedSize: String
         get() {
